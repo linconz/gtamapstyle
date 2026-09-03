@@ -1,0 +1,8 @@
+{
+  "displayName": "GTA 5 城市地图",
+  "displayNameEn": "GTA 5 City Map",
+  "descriptionZh": "使用真实 OpenFreeMap 与 OpenStreetMap 数据生成精确 3000×3000 的 GTA 5 风格城市地图，并支持自然语言范围控制和同范围 OFM 对照图。",
+  "descriptionEn": "Generate an exact 3000×3000 GTA 5-style map from real OpenFreeMap and OpenStreetMap data, with natural-language area control and an optional matching OFM reference image.",
+  "author": "linconz",
+  "allowedTools": "Bash"
+}

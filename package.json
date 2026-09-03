@@ -1,0 +1,17 @@
+{
+  "name": "gta5-map-style-skill",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node --check scripts/export-city-map.mjs && node --check scripts/build-workbuddy-package.mjs",
+    "package:workbuddy": "node scripts/build-workbuddy-package.mjs"
+  },
+  "dependencies": {
+    "maplibre-gl": "6.7.0",
+    "playwright-core": "1.62.1"
+  }
+}

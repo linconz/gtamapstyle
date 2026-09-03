@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <link rel="stylesheet" href="/vendor/maplibre-gl.css">
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #050505;
+      }
+
+      .maplibregl-canvas {
+        outline: none;
+      }
+
+      .gta5-blip {
+        display: block;
+        width: 64px;
+        height: 64px;
+        object-fit: contain;
+        pointer-events: none;
+        user-select: none;
+        filter: grayscale(1) contrast(1.15) drop-shadow(0 0 2px #050505) drop-shadow(0 0 2px #050505);
+      }
+
+      .gta5-blip--green {
+        filter: url("#gta5-safehouse-green") drop-shadow(0 0 2px #050505) drop-shadow(0 0 2px #050505);
+      }
+
+      .gta5-blip--pale-yellow {
+        filter: brightness(0) saturate(100%) invert(88%) sepia(28%) saturate(1113%) hue-rotate(349deg) brightness(102%) contrast(91%) saturate(35%) brightness(112%) drop-shadow(0 0 2px #050505) drop-shadow(0 0 2px #050505);
+      }
+
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute">
+      <filter id="gta5-safehouse-green" color-interpolation-filters="sRGB">
+        <feColorMatrix
+          type="matrix"
+          values="0.1568627 0 0 0 0
+                  0 0.8588235 0 0 0
+                  0 0 0.0196078 0 0
+                  0 0 0 1 0"
+        />
+      </filter>
+    </svg>
+    <div id="map"></div>
+    <script type="module">
+      import * as maplibregl from "/vendor/maplibre-gl.mjs";
+
+      window.__MAP_CONFIG__ = __GTA5_MAP_CONFIG_JSON__;
+      window.__MAP_READY__ = false;
+      window.__MAP_ERROR__ = "";
+
+      const openFreeMapStyle = {
+        version: 8,
+        sources: {
+          openmaptiles: {
+            type: "vector",
+            url: "https://tiles.openfreemap.org/planet"
+          }
+        },
+        layers: [
+          {
+            id: "background",
+            type: "background",
+            paint: { "background-color": "#050505" }
+          },
+          {
+            id: "water",
+            type: "fill",
+            source: "openmaptiles",
+            "source-layer": "water",
+            paint: { "fill-color": "#647A9E", "fill-opacity": 1 }
+          },
+          {
+            id: "waterway",
+            type: "line",
+            source: "openmaptiles",
+            "source-layer": "waterway",
+            paint: {
+              "line-color": "#647A9E",
+              "line-opacity": 1,
+              "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.6, 12, 1.4, 15, 3.2]
+            }
+          },
+          {
+            id: "roads-casing",
+            type: "line",
+            source: "openmaptiles",
+            "source-layer": "transportation",
+            filter: [
+              "match",
+              ["get", "class"],
+              ["motorway", "trunk", "primary", "secondary", "tertiary", "minor", "service", "track", "path", "raceway"],
+              true,
+              false
+            ],
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: {
+              "line-color": "#050505",
+              "line-opacity": 1,
+              "line-width": ["interpolate", ["linear"], ["zoom"], 9, 2.2, 12, 4.5, 15, 10]
+            }
+          },
+          {
+            id: "roads-path",
+            type: "line",
+            source: "openmaptiles",
+            "source-layer": "transportation",
+            filter: ["match", ["get", "class"], ["path", "track"], true, false],
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: {
+              "line-color": "#414347",
+              "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.3, 12, 0.8, 15, 1.8]
+            }
+          },
+          {
+            id: "roads-minor",
+            type: "line",
+            source: "openmaptiles",
+            "source-layer": "transportation",
+            filter: ["match", ["get", "class"], ["minor", "service", "raceway"], true, false],
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: {
+              "line-color": "#616367",
+              "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.45, 12, 1.2, 15, 2.8]
+            }
+          },
+          {
+            id: "roads-secondary",
+            type: "line",
+            source: "openmaptiles",
+            "source-layer": "transportation",
+            filter: ["match", ["get", "class"], ["secondary", "tertiary"], true, false],
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: {
+              "line-color": "#898B8E",
+              "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.75, 12, 1.9, 15, 4.2]
+            }
+          },
+          {
+            id: "roads-primary",
+            type: "line",
+            source: "openmaptiles",
+            "source-layer": "transportation",
+            filter: ["match", ["get", "class"], ["trunk", "primary"], true, false],
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: {
+              "line-color": "#AEB0B1",
+              "line-width": ["interpolate", ["linear"], ["zoom"], 9, 1.15, 12, 2.8, 15, 6.2]
+            }
+          },
+          {
+            id: "roads-motorway",
+            type: "line",
+            source: "openmaptiles",
+            "source-layer": "transportation",
+            filter: ["==", ["get", "class"], "motorway"],
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: {
+              "line-color": "#DADADA",
+              "line-width": ["interpolate", ["linear"], ["zoom"], 9, 1.6, 12, 3.8, 15, 8]
+            }
+          },
+          {
+            id: "runways",
+            type: "line",
+            source: "openmaptiles",
+            "source-layer": "transportation",
+            filter: ["match", ["get", "class"], ["runway", "taxiway"], true, false],
+            layout: { "line-cap": "butt", "line-join": "round" },
+            paint: {
+              "line-color": "#616367",
+              "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.7, 12, 2.2, 15, 5]
+            }
+          }
+        ]
+      };
+
+      function once(target, eventName) {
+        return new Promise((resolve) => target.once(eventName, resolve));
+      }
+
+      function preloadImages(markers) {
+        const sources = [...new Set(markers.map((marker) => marker.iconUrl))];
+        return Promise.all(sources.map((source) => new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = async () => {
+            if (typeof image.decode === "function") await image.decode().catch(() => {});
+            resolve();
+          };
+          image.onerror = () => reject(new Error(`地点图标加载失败：${source}`));
+          image.src = source;
+        })));
+      }
+
+      async function initMap() {
+        try {
+          const config = window.__MAP_CONFIG__;
+          const isOfmOriginal = config.renderMode === "ofm-original";
+          const markers = isOfmOriginal ? [] : config.markers;
+          const imagesLoaded = preloadImages(markers);
+          const map = new maplibregl.Map({
+            container: "map",
+            style: isOfmOriginal
+              ? "https://tiles.openfreemap.org/styles/liberty"
+              : openFreeMapStyle,
+            center: [config.center.lng, config.center.lat],
+            zoom: config.zoom,
+            bearing: 0,
+            pitch: 0,
+            interactive: false,
+            attributionControl: false,
+            fadeDuration: 0,
+            preserveDrawingBuffer: true,
+            renderWorldCopies: false,
+            localIdeographFontFamily: false
+          });
+
+          let lastMapError = "";
+          map.on("error", (event) => {
+            lastMapError = event?.error?.message || "OpenFreeMap 瓦片加载失败";
+          });
+          await once(map, "load");
+          const tileDeadline = Date.now() + 90_000;
+          while (!map.areTilesLoaded() && Date.now() < tileDeadline) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+          if (!map.areTilesLoaded()) throw new Error(lastMapError || "OpenFreeMap 瓦片未完整加载");
+          await imagesLoaded;
+
+          for (const marker of markers) {
+            const image = document.createElement("img");
+            image.className = "gta5-blip";
+            if (marker.iconColor === "green") image.classList.add("gta5-blip--green");
+            if (marker.iconColor === "pale-yellow") image.classList.add("gta5-blip--pale-yellow");
+            image.src = marker.iconUrl;
+            image.alt = "";
+            image.draggable = false;
+            new maplibregl.Marker({ element: image, anchor: "center" })
+              .setLngLat([marker.lng, marker.lat])
+              .addTo(map);
+          }
+
+          await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+          await new Promise((resolve) => setTimeout(resolve, 600));
+          window.__MAP_READY__ = true;
+        } catch (error) {
+          window.__MAP_ERROR__ = error instanceof Error ? error.message : String(error);
+        }
+      }
+
+      initMap();
+    </script>
+  </body>
+</html>
