@@ -339,3 +339,8 @@ Ask the Agent explicitly to replace the existing file, or add `--force` when run
 ### 🖼️ Rendering Fails
 
 Check the Node.js version, Google Chrome installation, and network access to OpenFreeMap, Nominatim, and Overpass. See [`references/openstreetmap-setup.md`](references/openstreetmap-setup.md) for detailed troubleshooting steps.
+
+## 🙏 Acknowledgments
+
+- Thanks to [citizenfx/fivem-docs](https://github.com/citizenfx/fivem-docs) for providing the icon assets.
+- Thanks to [OpenFreeMap](https://openfreemap.org/) and [OpenStreetMap](https://www.openstreetmap.org/) for providing map services and data.

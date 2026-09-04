@@ -341,3 +341,8 @@ $HOME/.agents/skills/gta5-map-style/SKILL.md
 ### 🖼️ 渲染失败
 
 检查 Node.js 版本、Google Chrome，以及 OpenFreeMap、Nominatim 和 Overpass 的网络连接。更详细的排查步骤见 [`references/openstreetmap-setup.md`](references/openstreetmap-setup.md)。
+
+## 🙏 致谢
+
+- 感谢 [citizenfx/fivem-docs](https://github.com/citizenfx/fivem-docs) 提供的素材图标。
+- 感谢 [OpenFreeMap](https://openfreemap.org/) 以及 [OpenStreetMap](https://www.openstreetmap.org/) 提供的地图服务与数据。
